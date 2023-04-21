@@ -64,6 +64,8 @@ class VecVideoRecorder(VecEnvWrapper):
         self.recording = False
         self.recorded_frames = 0
 
+        self.ep = 0
+
     def reset(self) -> VecEnvObs:
         obs = self.venv.reset()
         self.start_video_recorder()
@@ -72,7 +74,7 @@ class VecVideoRecorder(VecEnvWrapper):
     def start_video_recorder(self) -> None:
         self.close_video_recorder()
 
-        video_name = f"{self.name_prefix}-step-{self.step_id}-to-step-{self.step_id + self.video_length}"
+        video_name = f"{self.name_prefix}-episode-{self.ep}"
         base_path = os.path.join(self.video_folder, video_name)
         self.video_recorder = video_recorder.VideoRecorder(
             env=self.env, base_path=base_path, metadata={"step_id": self.step_id}
@@ -92,8 +94,10 @@ class VecVideoRecorder(VecEnvWrapper):
         if self.recording:
             self.video_recorder.capture_frame()
             self.recorded_frames += 1
-            if self.recorded_frames > self.video_length:
-                logger.info("Saving video to ", self.video_recorder.path)
+            # if self.recorded_frames > self.video_length:
+            if dones[0]:
+                self.ep += 1
+                print("Saving video to ", self.video_recorder.path)
                 self.close_video_recorder()
         elif self._video_enabled():
             self.start_video_recorder()

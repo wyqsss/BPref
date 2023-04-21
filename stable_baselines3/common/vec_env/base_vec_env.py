@@ -168,12 +168,13 @@ class VecEnv(ABC):
         """
         raise NotImplementedError
 
-    def render(self, mode: str = "human") -> Optional[np.ndarray]:
+    def render(self, mode: str = "human", camera_name: str = "corner2") -> Optional[np.ndarray]:
         """
         Gym environment rendering
 
         :param mode: the rendering type
         """
+        print("go to render")
         try:
             imgs = self.get_images()
         except NotImplementedError:
@@ -278,8 +279,8 @@ class VecEnvWrapper(VecEnv):
     def close(self) -> None:
         return self.venv.close()
 
-    def render(self, mode: str = "human") -> Optional[np.ndarray]:
-        return self.venv.render(mode=mode)
+    def render(self, mode: str = "human", camera_name="corner2") -> Optional[np.ndarray]:
+        return self.venv.render(mode=mode, camera_name=camera_name)
 
     def get_images(self) -> Sequence[np.ndarray]:
         return self.venv.get_images()

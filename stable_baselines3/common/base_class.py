@@ -673,6 +673,9 @@ class BaseAlgorithm(ABC):
         # Copy parameter list so we don't mutate the original dict
         data = self.__dict__.copy()
 
+        # print(data)
+        data.pop("custom_logger")
+
         # Exclude is union of specified parameters (if any) and standard exclusions
         if exclude is None:
             exclude = []

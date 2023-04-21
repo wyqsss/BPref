@@ -2,8 +2,8 @@ import os
 
 from setuptools import find_packages, setup
 
-with open(os.path.join("stable_baselines3", "version.txt"), "r") as file_handler:
-    __version__ = file_handler.read().strip()
+# with open(os.path.join("stable_baselines3", "version.txt"), "r") as file_handler:
+#     __version__ = file_handler.read().strip()
 
 
 long_description = """
@@ -126,7 +126,7 @@ setup(
     license="MIT",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    version=__version__,
+    # version=__version__,
 )
 
 # python setup.py sdist

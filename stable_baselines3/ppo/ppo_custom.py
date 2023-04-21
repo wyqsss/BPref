@@ -251,6 +251,7 @@ class PPO_CUSTOM(OnPolicyAlgorithm):
         tb_log_name: str = "PPO_CUSTOM",
         eval_log_path: Optional[str] = None,
         reset_num_timesteps: bool = True,
+        args: str = None,
     ) -> "PPO_CUSTOM":
         
         return super(PPO_CUSTOM, self).learn(
@@ -263,4 +264,5 @@ class PPO_CUSTOM(OnPolicyAlgorithm):
             tb_log_name=tb_log_name,
             eval_log_path=eval_log_path,
             reset_num_timesteps=reset_num_timesteps,
+            args=args
         )

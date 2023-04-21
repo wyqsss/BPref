@@ -15,6 +15,7 @@ from stable_baselines3.common.utils import safe_mean
 from stable_baselines3.common.vec_env import VecEnv
 from collections import deque
 from logger import Logger
+import os
 
 class OnPolicyAlgorithm(BaseAlgorithm):
     """
@@ -98,6 +99,8 @@ class OnPolicyAlgorithm(BaseAlgorithm):
         self.rollout_buffer = None
         self.mode_counter = 0
         self.metaworld_flag = metaworld_flag
+        if tensorboard_log is None:
+            tensorboard_log = "logs"
         
         self.custom_logger = Logger(
             tensorboard_log,
@@ -237,6 +240,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
         tb_log_name: str = "OnPolicyAlgorithm",
         eval_log_path: Optional[str] = None,
         reset_num_timesteps: bool = True,
+        args: str = None
     ) -> "OnPolicyAlgorithm":
         iteration = 0
 
@@ -245,6 +249,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
         )
 
         callback.on_training_start(locals(), globals())
+        sp = 1
 
         while self.num_timesteps < total_timesteps:
             continue_training = self.collect_rollouts(self.env, callback, self.rollout_buffer, n_rollout_steps=self.n_steps)
@@ -282,6 +287,10 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                 logger.dump(step=self.num_timesteps)
 
             self.train()
+            if args.save_model and self.num_timesteps / (sp * args.save_internel) > 1:
+                sp += 1
+                self.save(path=os.path.join(args.save_path, args.env, f"seed-{args.seed}-step-{self.num_timesteps}"))
+
 
         callback.on_training_end()
 

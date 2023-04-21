@@ -25,6 +25,10 @@ keys/
 /env
 /venv
 
+raw_logs/
+checkpoints/
+figures/
+videos/
 
 *.sublime-project
 *.sublime-workspace

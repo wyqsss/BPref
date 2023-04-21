@@ -7,8 +7,11 @@ from collections import OrderedDict
 from stable_baselines3 import PPO_CUSTOM
 from stable_baselines3.ppo import MlpPolicy
 from stable_baselines3.common.env_util import make_vec_dmcontrol_env, make_vec_metaworld_env
+from stable_baselines3.common.vec_env import VecVideoRecorder
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from stable_baselines3.common.vec_env import VecNormalize
+import numpy as np
+import cv2
 
 def linear_schedule(initial_value: Union[float, str]) -> Callable[[float], float]:
     """
@@ -29,12 +32,15 @@ def linear_schedule(initial_value: Union[float, str]) -> Callable[[float], float
 
     return func
 
+def v_tri():
+    return True
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--env", type=str, default="dog_walk", help="environment ID")
     parser.add_argument("-tb", "--tensorboard-log", help="Tensorboard log dir", default="logs/PPO/", type=str)
     parser.add_argument("--seed", help="Random generator seed", type=int, default=123)
-    parser.add_argument("--n-envs", help="# of parallel environments", type=int, default=16)
+    parser.add_argument("--n-envs", help="# of parallel environments", type=int, default=1)
     parser.add_argument("--n-steps", help="# of steps to run for each environment per update", type=int, default=500)
     parser.add_argument("--lr", help="learning rate", type=float, default=3e-4)
     parser.add_argument("--total-timesteps", help="total timesteps", type=int, default=2000000)
@@ -48,9 +54,12 @@ if __name__ == "__main__":
     parser.add_argument("--clip-init", help="Initial value of clipping", type=float, default=0.4)
     parser.add_argument("--n-epochs", help="Number of epoch when optimizing the surrogate loss", type=int, default=20)
     parser.add_argument("--normalize", help="Normalization", type=int, default=1)   
-    parser.add_argument("--save-model", help="if save the model", action='store_true')   
-    parser.add_argument("--save-path", help="save the model path", type=str, default="checkpoints")    
-    parser.add_argument("--save-internel", help="internal of saving model", type=int, default=50000)    
+  
+    parser.add_argument("--reload-path", help="test model path", type=str)    
+    parser.add_argument("--test-epochs", type=int, default=5)  
+    parser.add_argument("--video-path", type=str, default="videos")   
+
+    parser.add_argument("--visual", action='store_true')   
     args = parser.parse_args()
     
     metaworld_flag = False
@@ -99,8 +108,9 @@ if __name__ == "__main__":
             monitor_dir=args.tensorboard_log,
             seed=args.seed)
     
-    if args.normalize == 1:
-        env = VecNormalize(env, norm_reward=False)
+    if args.visual:
+        v_path = os.path.join(args.video_path, args.env + '_seed_' + args.reload_path.split('-')[-3])
+        env = VecVideoRecorder(env, video_folder=v_path, record_video_trigger=v_tri)
     
     # network arch
     net_arch = [dict(pi=[args.hidden_dim]*args.num_layer, 
@@ -130,8 +140,20 @@ if __name__ == "__main__":
         ordered_args = OrderedDict([(key, vars(args)[key]) for key in sorted(vars(args).keys())])
         yaml.dump(ordered_args, f)
     
-    if args.save_model:
-        os.makedirs(os.path.join(args.save_path, args.env), exist_ok=True)
-    
-    model.learn(total_timesteps=args.total_timesteps, args=args)
-    # model.save("ppo_push")
+    re_model = model.load(args.reload_path)
+
+    avg_reward = []
+    for i in range(args.test_epochs):
+        obs = env.reset()
+        rs = 0
+        while True:
+            action, _states = re_model.predict(obs)
+            obs, rewards, dones, info = env.step(action)
+            rs += rewards[0]
+            if dones[0]:
+                print(info[0].get("episode")['s'])
+                break
+        avg_reward.append(rs)
+        print(f"episode reward is {rs}")
+
+    print(f"test average reward is {np.mean(avg_reward)}")

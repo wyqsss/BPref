@@ -2,7 +2,7 @@ name: bpref
 channels:
   - defaults
 dependencies:
-  - python=3.6
+  - python=3.7
   - pytorch=1.4.0
   - cudatoolkit=10.1
   - absl-py
@@ -10,11 +10,13 @@ dependencies:
   - pip
   - pip:
     - termcolor
-    - git+git://github.com/deepmind/dm_control.git@d1fe1d14fb229d3ad784e40d8c54491d30e1f08a
+    # - git+git://github.com/deepmind/dm_control.git@d1fe1d14fb229d3ad784e40d8c54491d30e1f08a #pip install dm_control
+    - dm_control
     - tb-nightly
     - imageio
     - imageio-ffmpeg
-    - git+git://github.com/facebookresearch/hydra@0.11_branch
+    # - git+git://github.com/facebookresearch/hydra@0.11_branch
+    - hydra-core==0.11.3
     - matplotlib
     - glfw==1.11.2
     - scikit-image
