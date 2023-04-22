@@ -109,7 +109,7 @@ if __name__ == "__main__":
             seed=args.seed)
     
     if args.visual:
-        v_path = os.path.join(args.video_path, args.env + '_seed_' + args.reload_path.split('-')[-3])
+        v_path = os.path.join(args.video_path, args.env + args.reload_path.split('.')[0])
         env = VecVideoRecorder(env, video_folder=v_path, record_video_trigger=v_tri)
     
     # network arch
@@ -152,6 +152,7 @@ if __name__ == "__main__":
             rs += rewards[0]
             if dones[0]:
                 print(info[0].get("episode")['s'])
+                cv2.imwrite("example.png", env.render())
                 break
         avg_reward.append(rs)
         print(f"episode reward is {rs}")

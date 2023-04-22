@@ -176,7 +176,7 @@ class VecEnv(ABC):
         """
         print("go to render")
         try:
-            imgs = self.get_images()
+            imgs = self.get_images(camera_name=camera_name)
         except NotImplementedError:
             logger.warn(f"Render not defined for {self}")
             return
