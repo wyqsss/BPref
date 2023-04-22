@@ -28,7 +28,7 @@ keys/
 raw_logs/
 checkpoints/
 figures/
-videos/
+*video*/
 *.png
 
 *.sublime-project
@@ -60,3 +60,7 @@ figures
 *.txt
 figure/
 data/
+
+captures/
+*dataset/
+*.zip

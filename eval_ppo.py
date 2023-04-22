@@ -13,6 +13,19 @@ from stable_baselines3.common.vec_env import VecNormalize
 import numpy as np
 import cv2
 
+
+def images_to_video(images, nc, num_clips=10):
+    print(len(images))
+    for i in range(num_clips):
+        st_index = np.random.randint(0, len(images) - 30)
+        sub_images = images[st_index:st_index+30]
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        video = cv2.VideoWriter(f"dataset/clip_{nc}_{i}.mp4", fourcc, 25, (640, 480))
+        for img in sub_images:
+            video.write(img)
+        video.release()
+
+
 def linear_schedule(initial_value: Union[float, str]) -> Callable[[float], float]:
     """
     Linear learning rate schedule.
@@ -145,16 +158,20 @@ if __name__ == "__main__":
     avg_reward = []
     for i in range(args.test_epochs):
         obs = env.reset()
+        # images = []
         rs = 0
+        # images.append(env.render())
         while True:
             action, _states = re_model.predict(obs)
             obs, rewards, dones, info = env.step(action)
+            # images.append(env.render())
             rs += rewards[0]
             if dones[0]:
                 print(info[0].get("episode")['s'])
-                cv2.imwrite("example.png", env.render())
+                # cv2.imwrite("example.png", env.render())
                 break
         avg_reward.append(rs)
+        # images_to_video(images=images, nc=i)
         print(f"episode reward is {rs}")
 
     print(f"test average reward is {np.mean(avg_reward)}")
