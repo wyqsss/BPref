@@ -53,7 +53,7 @@ src
 
 MUJOCO_LOG.TXT
 exp/
-*.ipynb
+# *.ipynb
 test_scripts/*
 *.pdf
 figures
@@ -64,3 +64,4 @@ data/
 captures/
 *dataset/
 *.zip
+*.csv
