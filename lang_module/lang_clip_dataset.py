@@ -5,6 +5,8 @@ import cv2
 import numpy as np
 import random
 
+from torchvision import transforms
+
 
 raw_data = "np_data/episode_0.npy"
 raw_data1 = "np_data/episode_2.npy"
@@ -104,10 +106,48 @@ class Lang_Clip_DataSet(Dataset):
     #         self.data.append((self.pos_samples[i][1], self.pos_samples[i][2]))  # positive samples
     #         self.labels.append(torch.tensor([1, 0], dtype=torch.float32))
 
+class Image_DataSet(Dataset):
+    def __init__(self, csv_path):
+        super(Image_DataSet, self).__init__()
 
+        self.annotation = np.loadtxt(open(csv_path, 'rb'), delimiter=',', dtype=str)
+        self.data = []
+        self.resize = transforms.Resize([224,244])
+        for item in self.annotation:
+            # sent_emb = self.generate_embeddings(item[1])
+            images = self.generate_images(item[0])
+            self.data.extend(images)
+
+
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        return self.data[idx]   #sentence embedding, image sequence, label
+    
+    def generate_images(self, video_path):
+        # vid = imageio.get_reader(video_path, "ffmpeg")
+        # print(video_path)
+        images = []
+        capture = cv2.VideoCapture(video_path)
+
+        while True:
+            ret,img=capture.read() # img 就是一帧图片  
+            if not ret:
+                break # 当获取完最后一帧就结束   
+            # print(img.shape)       
+            # 可以用 cv2.imshow() 查看这一帧，也可以逐帧保存
+            img = img.transpose(2, 0, 1)
+            img = torch.tensor(img, dtype=torch.float32)
+            images.append(self.resize(img))
+
+        # images = np.array(images).transpose(0, 3, 1, 2)
+        # print(f"sequence shape is {images.shape}")
+        return images  # [B, C, H, W]，
 
 
 
 if __name__ == "__main__":
-    data_set = Lang_Clip_DataSet(glove_path="glove.6B.50d.txt", csv_path="p2anotation.csv")
+    data_set = Image_DataSet( csv_path="p2anotation.csv")
     print(len(data_set))
