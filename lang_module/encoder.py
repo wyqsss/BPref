@@ -44,13 +44,14 @@ class Clip_Encoder(nn.Module):
         #     nn.ReLU(),
         #     nn.Flatten(1, -1)
         # )
-        self.image_conv = models.resnet50(pretrained=True)
-        self.image_conv.fc = torch.nn.Linear(2048, 512)
-        self.lstm = nn.LSTM(input_size=512, hidden_size=64, num_layers=2)
+        self.image_conv = models.resnet18(pretrained=True)
+        del self.image_conv.fc
+        # self.image_conv.fc = torch.nn.Linear(2048, 512)
+        self.lstm = nn.LSTM(input_size=512, hidden_size=256, num_layers=2)
         self.fc1 = nn.Sequential(
-        nn.Linear(1920, 1024),
+        nn.Linear(256, 128),
         nn.ReLU(),
-        nn.Linear(1024, 128)
+        nn.Linear(128, 128)
         )
 
 
@@ -60,16 +61,20 @@ class Clip_Encoder(nn.Module):
         # print(f"x_3d shape is {x_3d.shape}")
         features = []
         for i in range(x_3d.size(1)):
+        
             with torch.no_grad():
                 x = self.image_conv(x_3d[:, i, :, :, :])
                 # print(f"cnn out shape is {x.shape}")
                 features.append(x)
-        features = torch.stack(features)
-        out, (h_n, c_n) = self.lstm(features)
-        out = out.permute(1, 0, 2)
-        out = torch.flatten(out, 1, 2)
+                # out, hidden = self.lstm(x.unsqueeze(0), hidden)
+        # features = torch.stack(features)
+        # out, (h_n, c_n) = self.lstm(features)
+        # out = out.permute(1, 0, 2)
+        # out = torch.flatten(out, 1, 2)
+        x = torch.mean(torch.stack(features), dim=1, keepdim=True)
+        # x = self.fc1(out[-1, : , :])
         # print(out.shape)
-        x = self.fc1(out)
+        x = self.fc1(x)
         # x = F.relu(x)
         return x
 

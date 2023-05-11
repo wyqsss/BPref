@@ -7,7 +7,7 @@ import numpy as np
 
 def main(args):
     full_dataset = Lang_Clip_DataSet(args.glove, csv_path="p2anotation.csv")
-    train_loader = torch.utils.data.DataLoader(full_dataset, batch_size=args.batch_size, shuffle=True)
+    train_loader = torch.utils.data.DataLoader(full_dataset, batch_size=args.batch_size, shuffle=True, num_workers=4)
 
     device = args.device
     model = Contras_Model()
@@ -108,10 +108,10 @@ if __name__ == "__main__":
     args.add_argument('--annotation', type=str, default='./annotation.txt')
     args.add_argument('--glove', type=str, default='./glove.6B.50d.txt')
     args.add_argument('--batch_size', type=int, default=64)
-    args.add_argument('--lr', type=float, default=0.05)
-    args.add_argument('--epochs', type=int, default=101)   
+    args.add_argument('--lr', type=float, default=0.2)
+    args.add_argument('--epochs', type=int, default=1001)   
     args.add_argument('--eval_internal', type=int, default=5) 
-    args.add_argument('--save_internal', type=int, default=20) 
+    args.add_argument('--save_internal', type=int, default=100) 
     
     args.add_argument('--save_path', type=str, default='./checkpoints/goal_lang_model')
     args.add_argument('--device', type=str, default='cuda:0')
@@ -120,7 +120,7 @@ if __name__ == "__main__":
 
     pars = args.parse_args()
 
-
+    print(f"args is : {pars}")
     if pars.load_model:
         evaluate(pars)
     else:

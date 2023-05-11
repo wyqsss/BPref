@@ -3,6 +3,7 @@ from torch.utils.data import Dataset, DataLoader
 import imageio
 import cv2
 import numpy as np
+import random
 
 
 raw_data = "np_data/episode_0.npy"
@@ -35,6 +36,9 @@ class Lang_Clip_DataSet(Dataset):
 
         self.data = []
         for item in self.annotation:
+            if item[1] == "others of the door":
+                if random.random() > 0.25:
+                    continue
             sent_emb = self.generate_embeddings(item[1])
             seq = self.generate_images(item[0])
             self.data.append((sent_emb, seq))
@@ -62,7 +66,7 @@ class Lang_Clip_DataSet(Dataset):
     
     def generate_images(self, video_path):
         # vid = imageio.get_reader(video_path, "ffmpeg")
-        print(video_path)
+        # print(video_path)
         images = []
         capture = cv2.VideoCapture(video_path)
 
@@ -75,7 +79,7 @@ class Lang_Clip_DataSet(Dataset):
             images.append(img)
 
         images = np.array(images).transpose(0, 3, 1, 2)
-        print(f"sequence shape is {images.shape}")
+        # print(f"sequence shape is {images.shape}")
         return torch.tensor(images, dtype=torch.float32)  # [B, C, H, W]，
 
 
